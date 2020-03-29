@@ -28,7 +28,9 @@ def checkHasWaf():
     reqVal = True if ratioVal < CHECK_WAF_Ratio_Value else False
     if reqVal:
         logger.error(" target is protected by some kind of WAF/IPS/IDS")
+        kb.hasWaf = True
     else:
+        kb.hasWaf = False
         logger.success(" target is not protected by some WAF/IPS/IDS")
 
 
@@ -51,6 +53,7 @@ def setWafFunctions():
 
 def checkWaf():
     setWafFunctions()
+    check = False
     for function, product in kb.wafFunctions:
         try:
             print.green("[+] checking for WAF/IPS/IDS product '%s'" % product)
@@ -63,7 +66,12 @@ def checkWaf():
         if found:
             msg = "[*] WAF/IPS/IDS identified as '%s'" % product
             print.red(msg)
+            check = True
             break
+    else:
+        if not check:
+            msg = "[-] not found WAF/IPS/IDS"
+    
 
 
 def initKb():
@@ -89,9 +97,10 @@ def start():
     if not checkConnection():
         print.red("[-] 目标连接失败")
         sys.exit()
-    print.white(options)
+    # print.white(options)
     checkHasWaf()
-    checkWaf()
+    if kb.hasWaf:
+        checkWaf()
 
 
 if __name__ == '__main__':
